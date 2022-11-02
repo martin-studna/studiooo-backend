@@ -1,0 +1,212 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id  String  @id @default(cuid())
+  email String @unique
+  password String
+  username  String?
+  title String?
+  fullname  String?
+  age Int?
+  gender  Gender?
+  employment String?
+  institution String?
+  field String?
+  school String?
+  role Role @default(USER)
+  blocked Boolean   @default(false)
+  firstLogin Boolean   @default(true)
+  formShown Boolean @default(false)
+  lastLogin DateTime?
+  updatedAt DateTime  @default(now())
+  createdAt DateTime  @default(now())
+  chapterEntries ChapterEntry[]
+  testEntries TestEntry[]
+  isActivated Boolean @default(false)
+  workshopResults WorkshopResult[]
+  chapterResults ChapterResult[]
+  testResults TestResult[]
+  activationToken String?
+  resetPasswordToken String?
+  resetPasswordTokenExpires DateTime?
+}
+
+model WorkshopResult {
+  id String @id @default(cuid())
+  userId String 
+  user User @relation(fields: [userId], references: [id])
+  workshopId String
+  workshop Workshop @relation(fields: [workshopId], references: [id])
+  completed Boolean @default(false)
+  canSkip Boolean @default(true)
+  testCompleted Boolean @default(false)
+}
+
+model ChapterResult {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  chapterId String? 
+  chapter Chapter? @relation(fields: [chapterId], references: [id])
+  workshopId String 
+  workshop Workshop @relation(fields: [workshopId], references: [id])
+  overviewCompleted Boolean @default(false)
+  testCompleted Boolean @default(false)
+  order Int?
+}
+
+model TestResult {
+  id String @id @default(cuid())
+  userId String @unique
+  user User @relation(fields: [userId], references: [id])
+  workshopId String? @unique
+  workshop Workshop? @relation(fields: [workshopId], references: [id])
+}
+
+model ChapterEntry {
+  id  String  @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  chapterId String?
+  chapter Chapter? @relation(fields: [chapterId], references: [id])
+  questionId String?
+  question ChapterQuestion? @relation(fields: [questionId], references: [id])
+  answerId String?
+  answer ChapterAnswer? @relation(fields: [answerId], references: [id])
+  updatedAt DateTime @default(now())
+}
+
+model TestEntry {
+  id  String  @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  questionId String
+  question TestQuestion @relation(fields: [questionId], references: [id])
+  answerId String
+  answer TestAnswer @relation(fields: [answerId], references: [id])
+  updatedAt DateTime @default(now())
+}
+
+model Attendee {
+  userId String @unique
+  workshopId String @unique
+}
+
+model Workshop {
+  id  String  @id @default(cuid())
+  title String
+  author String?
+  description String?
+  summary String?
+  overview String?
+  chapterNumber Int @default(0)
+  content  String?
+  hours Int?
+  imageUrl String?
+  videoUrl String?
+  difficulty String?
+  isPaid Boolean @default(false)  
+  chapters Chapter[]
+  questions TestQuestion[]  
+  published Boolean @default(false)
+  publishedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime @default(now())
+  tolerance Float @default(100.0)
+  chapterResults ChapterResult[]
+  workshopResults WorkshopResult[]
+  testResults TestResult[]
+}
+
+model Chapter {
+  id String @id @default(cuid())
+  title String
+  media String?
+  order Int?
+  timeEstimate String?
+  overviewTimeEstimate String?
+  testTimeEstimate String?
+  description String
+  questions ChapterQuestion[]
+  chapterEntries ChapterEntry[]
+  workshopId String
+  workshop Workshop @relation(fields: [workshopId], references: [id])
+  chapterResults ChapterResult[]
+}
+
+model ChapterQuestion {
+  id String @id @default(cuid())
+  text String
+  answers ChapterAnswer[]
+  chapterId String?
+  chapter Chapter? @relation(fields: [chapterId], references: [id])
+  entries ChapterEntry[]
+}
+
+model ChapterAnswer {
+  id String @id @default(cuid())
+  text String
+  chapterQuestionId String?
+  chapterQuestion ChapterQuestion? @relation(fields: [chapterQuestionId], references: [id])
+  correct Boolean @default(false)
+  entries ChapterEntry[]
+}
+
+model TestAnswer {
+  id String @id @default(cuid())
+  text String
+  correct Boolean @default(false)
+  testQuestionId String?
+  testQuestion TestQuestion? @relation(fields: [testQuestionId], references: [id])
+  entries TestEntry[]
+}
+
+model TestQuestion {
+  id String @id @default(cuid())
+  workshopId String
+  workshop Workshop @relation(fields: [workshopId], references: [id])
+  text String
+  answers TestAnswer[]
+  entries TestEntry[]
+}
+
+model Certificate {
+  id  String  @id @default(cuid())
+  workshopId String
+  media String?
+  text String?
+}
+
+model CertificateResult {
+  id String  @id @default(cuid())
+  certificateId String
+  userId String
+  workshopId String
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  UNKNOWN
+}

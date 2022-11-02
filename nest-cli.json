@@ -1,0 +1,18 @@
+{
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src",
+  "projects": {
+    "emails": {
+      "type": "library",
+      "root": "libs/emails",
+      "entryFile": "index",
+      "sourceRoot": "libs/emails/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/emails/tsconfig.lib.json"
+      }
+    }
+  },
+  "compilerOptions": {
+    "webpack": true
+  }
+}
